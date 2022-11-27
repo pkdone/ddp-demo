@@ -44,13 +44,13 @@ cp 'EXAMPLE.env' '.env'
 ```
 
 
- 2. TODO - front-end UI doesn't exist yet so don't try thisstep. Access the demo's user interface via a web browser, using the URL printed towards the end of the output from the script run in the previous step (`build-deploy.sh`), and then register as a new user.
+ 2. TODO - front-end UI doesn't exist yet so don't try this step. Access the demo's user interface via a web browser, using the URL printed towards the end of the output from the script run in the previous step (`build-deploy.sh`), and then register as a new user.
 
 
 
 ## Coding And Running The App Back-End Locally On Your Workstation
 
-Using Node.js installed on your workstation and your IDE of choice (e.g. _VS Code_), you can locally develop, refactor, run and debug the JavaScript functions in the main back-end source `back-end/ddp-demo.js` file . The top of the source file contains sample code to run any of the API functions that will subsequently be exposed at HTTPS Endpoints when deployed as an Atlas App Services project. Just uncomment the line which invokes the particular function you want to test and debug before running from your IDE or command-line. Example Node.js command-line:
+Using Node.js installed on your workstation and your IDE of choice (e.g. _VS Code_), you can locally develop, refactor, run and debug the JavaScript functions in the main back-end source `back-end/ddp-demo.js` file. The top of the source file contains sample code to run any of the API functions that will subsequently be exposed at HTTPS Endpoints when deployed as an Atlas App Services project. Just uncomment the line which invokes the particular function you want to test and debug before running from your IDE or command-line. Example Node.js command-line:
 
 ```console
 ./node ddp-demo.js
