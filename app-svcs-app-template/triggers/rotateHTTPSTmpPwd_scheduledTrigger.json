@@ -1,0 +1,16 @@
+{
+    "name": "rotateHTTPSTmpPwd_scheduledTrigger",
+    "type": "SCHEDULED",
+    "config": {
+        "schedule": "*/15 * * * *",
+        "skip_catchup_events": true
+    },
+    "disabled": false,
+    "event_processors": {
+        "FUNCTION": {
+            "config": {
+                "function_name": "PRIV_rotateHTTPSTmpPwd"
+            }
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@mhoc/axios-digest-auth": "^0.8.0",
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.2",
+    "fs-extra": "^10.1.0",
+    "mongodb": "^4.9.0",
+    "npm": "^8.19.3"
+  }
+}

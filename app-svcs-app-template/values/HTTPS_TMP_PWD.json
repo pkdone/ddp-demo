@@ -1,0 +1,5 @@
+{
+    "name": "HTTPS_TMP_PWD",
+    "value": "HTTPS_TMP_PWD_SECRET",
+    "from_secret": true
+}

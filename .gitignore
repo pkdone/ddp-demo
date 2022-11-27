@@ -1,0 +1,11 @@
+.env
+.DS_Store
+node_modules/
+.vscode
+app/**
+tmp/**
+*.log
+npm-debug.log
+package-lock.json
+play.mongodb
+test.env
