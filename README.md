@@ -44,7 +44,7 @@ cp 'EXAMPLE.env' '.env'
 ```
 
 
- 2. Access the demo's user interface via a web browser, using the URL printed towards the end of the output from the script run in the previous step (`build-deploy.sh`), and then register as a new user.
+ 2. TODO - front-end UI doesn't exist yet so don't try thisstep. Access the demo's user interface via a web browser, using the URL printed towards the end of the output from the script run in the previous step (`build-deploy.sh`), and then register as a new user.
 
 
 
