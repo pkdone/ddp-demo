@@ -5,7 +5,7 @@ This project provides a demo to TODO.
 
 ## Prerequisites
 
- 1. Ensure you have a running Atlas MongoDB cluster which is has a tier of M2 or greater or is a Serverless instance. Ensure the cluster has a database user which has __read + write privileges the `ddp-db` database__ and ensure the Atlas Project's network access includes an access list entry to allow access from your workstation's IP address.
+ 1. Ensure you have a running Atlas MongoDB cluster which is has a tier of M2 or greater or is a Serverless instance. Ensure the cluster has a database user which has __read + write privileges for the `ddp-db` database__ and ensure the Atlas Project's network access includes an access list entry to allow access from your workstation's IP address.
 
  2. TODO: load data into the database
 
