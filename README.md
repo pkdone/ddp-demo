@@ -1,4 +1,4 @@
-# Data Delivery Platrform (DDP) Demo
+# Data Delivery Platform (DDP) Demo
 
 This project provides a demo to TODO. 
 
