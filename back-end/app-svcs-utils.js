@@ -1,4 +1,4 @@
-module.exports = { context_values_get, logJSONResult, PRIV_getDBCollection, PRIV_getRequestQueryParam, PRIV_logErrorAndReturnGenericError, getDummyRequestResponse };
+module.exports = { context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRIV_getDBCollection, PRIV_logErrorAndReturnGenericError, PRIV_ensureRequestResponseExist, getDummyRequestResponse };
 
 
 //
@@ -18,45 +18,69 @@ function context_values_get(key) {
 
 
 //
-// Log the result JSON to the console and also a log file cos it may be really larger
-// Only used when running this code in standaline node.js (not in Atlas App Services)
+// Log the start timestamp.
 //
-function logJSONResult(result) {
+// Only used when running this code in standalone node.js (not in Atlas App Services)
+//
+function logStartTimestamp(result) {
+  console.log(`START: ${new Date()}`);
+}
+
+
+//
+// Log the result JSON to the console and also a log file cos it may be really larger, also
+// logging end timestamp.
+//
+// Only used when running this code in standalone node.js (not in Atlas App Services)
+//
+function logEndTimestampWithJSONResult(result) {
   result = result || "<empty-result>";
   const fs = require("fs");
   console.log(JSON.stringify(result, null, 2));
   const TESTING_OUPUT_FILE = "tmp/results.json";
   fs.writeFileSync(TESTING_OUPUT_FILE, JSON.stringify(result, null, 2));
   console.log(`Test output file is at: ${TESTING_OUPUT_FILE}`);
+  console.log(`END: ${new Date()}`);
 }
 
 
 //
-// Get dummmy empty http request and response objects
-// Puts the parameters in both the 'query' string and the 'body.text' in because could be used by
-//  either a GET or POST (or other call)
-// Only used when running this code in standaline node.js (not in Atlas App Services)
+// Constructs dummy / mock request and response objects for testing functions intended to be for 
+// REST API calls.
+
+// Only request when running tests in satnadline node.js
 //
-function getDummyRequestResponse(parameters = {}) {
-  const request = {};
-  request.body = {};
-  request.body.text = () => JSON.stringify(parameters, null, 2);
-  request.query = parameters;
-  const response = {};
+function getDummyRequestResponse(dummyParameters) {
+  return PRIV_ensureRequestResponseExist(null, null, dummyParameters);
+}
+
+
+//
+// Ensures there is a request and response already present and if not creates placeholder versions.
+//
+// Required in Atlas App Services when running funcitons intended for HTTPS Endpoints direction 
+// from the console
+//
+// Required in Standaloine node.js to enable the same code to work - in this case usually the 
+// 'dummayParameters' is also provided with fake GET/POST values for testing standalone
+//
+function PRIV_ensureRequestResponseExist(request, response, dummyParameters = {}) {
+  if (typeof request === 'string') {
+    request = {param1: request};
+  } else if (!request) {
+    request = {};
+  }
+
+  request.body = request.body || {};
+
+  if (!request.body.text) {
+    request.body.text = () => JSON.stringify(dummyParameters, null, 2);
+  }
+
+  request.query = request.query || dummyParameters;
+  response = response || {};
   response.setStatusCode = () => {};
   return {request, response};
-}
-
-
-//
-// Get the http request query param, if any, or return empty string
-//
-function PRIV_getRequestQueryParam(request, paramName) {
-  if ((request) && (request.hasOwnProperty('query')) && (request.query) && (request.query.hasOwnProperty(paramName))) {
-    return request.query[paramName];
-  } else {
-    return '';
-  }
 }
 
 

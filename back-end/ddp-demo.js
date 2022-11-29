@@ -1,34 +1,80 @@
 require("dotenv").config();
-const {context_values_get, logJSONResult, PRIV_getDBCollection, PRIV_getRequestQueryParam,
-       PRIV_logErrorAndReturnGenericError, getDummyRequestResponse } = require("./app-svcs-utils");
+const {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRIV_getDBCollection, PRIV_logErrorAndReturnGenericError, PRIV_ensureRequestResponseExist, getDummyRequestResponse } = require("./app-svcs-utils");
 
 
-// TEST WRAPPER  (similar to App Services' function test console)
+// TEST WRAPPER  (similar to App Services' function test console, but for standalone node.js)
 (async() => {
-  console.log(`START: ${new Date()}`);
-  const {request, response} = getDummyRequestResponse({myParam: 'hello', myOtherParam: 'goodbye'});
-  let result = await GET_doSomething(request, response);
+  logStartTimestamp();
+
+  // TEST TO RUN  (only uncomment one test)
+  //let result = await PRIV_getLastTradedPriceForExchangeSymbolAsOf("AHD3M", new Date("2022-03-22T01:01:43.828Z"));
+  //let result = await PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol("AHD3M", new Date("2022-03-22T01:01:43.828Z"));
+  const {request, response} = getDummyRequestResponse({symbol: "AHD3M", date: "2022-03-22T01:01:43.828Z"});
+  let result = await GET_lastTradedPriceForExchangeSymbolAsOf(request, response);
+  //let result = await GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, response);  
   //let result = await POST_doThisThat(request, response);
-  logJSONResult(result);
-  console.log(`END: ${new Date()}`);
+
+  logEndTimestampWithJSONResult(result);
 })();
 
 
 //
-// Example function which will be turned into HTTP GET Endpoint
+// REST Get API wrapper for getting the last tradded price for a symbol as of a particular date.
 //
 // Curl example to invoke when deployed in App Svcs:
-//  curl https://x.y.com/app/appname/endpoint/doSomething?secret=376327322\&myParam=hello
+//  curl curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
 //
-async function GET_doSomething(request, response) {
+async function GET_lastTradedPriceForExchangeSymbolAsOf(request, response) {
+  const func = (typeof context === "undefined") ? PRIV_getLastTradedPriceForExchangeSymbolAsOf
+                                                : "PRIV_getLastTradedPriceForExchangeSymbolAsOf";
+  return await PRIV_restGetAPISymbolPlusDataWrapper(request, response, func);
+}
+
+
+
+//
+// REST Get API wrapper for getting the open, close, high, low & average traded proces for a
+// specific exchange symbox for a  specific day
+//
+// Curl example to invoke when deployed in App Svcs:
+//  curl curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
+//
+async function GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, response) {
+  const func = (typeof context === "undefined") ? PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol
+                                                  : "PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol";
+  return await PRIV_restGetAPISymbolPlusDataWrapper(request, response, func);
+}
+
+
+
+//
+// Check symbol and data paramrters provided via the REST API call and then invoke the target 
+// implementation function
+//
+async function PRIV_restGetAPISymbolPlusDataWrapper(request, response, apiFunction) {
+  ({request, response} = PRIV_ensureRequestResponseExist(request, response));
+
   try {
-    console.log(`Starting doing something at: ${new Date()}`);
-    const myParam = PRIV_getRequestQueryParam(request, 'myParam');
-    console.log(`Param received: ${myParam}`);
-    const num = await PRIV_querySomthingAndLog();
-    await PRIV_persistSomething(`Got ${num} records`);
-    console.log(`Ending doing something at: ${new Date()}`);
-    return {result: `Got ${num} records and saved a new record`};
+    const symbol = (request.query.hasOwnProperty('symbol')) ? request.query.symbol : '';
+    const dateText = (request.query.hasOwnProperty('date')) ? request.query.date : '';
+
+    if (!symbol || !dateText) {
+      response.setStatusCode(400);
+      return {"errorMessage": "User error - please provide params for both 'symbol' and 'date'"};
+    }
+
+    const date = new Date(dateText);
+
+    if (isNaN(date)) {
+      response.setStatusCode(400);
+      return {"errorMessage": "User error - please the date param in the correct format, e.g.: '2021-12-31T23:59:59.999Z'"};
+    }
+
+    let result = (typeof apiFunction === "function") ?
+      await apiFunction(symbol, date) :
+      await context.functions.execute(apiFunction, symbol, date);
+
+    return {result: result};
   } catch (error) {
     return PRIV_logErrorAndReturnGenericError(error, response);
   }
@@ -42,6 +88,8 @@ async function GET_doSomething(request, response) {
 //  curl -H "Content-Type: application/json" -d '{"myParam": "hello", "myOtherParam": "goodbye"}' https://x.y.com/app/appname/endpoint/doSomething?secret=376327322
 //
 async function POST_doThisThat(request, response) {
+  ({request, response} = PRIV_ensureRequestResponseExist(request, response));
+
   try {
     console.log(`Doing this and that at: ${new Date()}`);
     const bodyText = request.body.text();
@@ -56,46 +104,71 @@ async function POST_doThisThat(request, response) {
 
 
 //
-// Query some shit
+// Get the last tradded price for a symbol as of a particular date.
 //
-async function PRIV_querySomthingAndLog(orgConfig) {
-  console.log(`Querying something`);
-  const collName = PRIV_getConstants().XXDATA_COLLNAME;  
+// db.trades_ts.explain("executionStats").find({exchange_symbol: 'AHD3M', ts: {$lte: ISODate("2022-03-22T01:01:43.828Z")}})
+//
+async function PRIV_getLastTradedPriceForExchangeSymbolAsOf(symbol, date) {
+  const collName = PRIV_getConstant("TRADES_TS_COLLNAME");  
   const coll = PRIV_getDBCollection(collName);  
-  const queryFilter = {"message" : {"$ne": ""}};
-  const queryProjection = {"_id": 0, "timestamp": 1, "message": 1};
-  const querySort = {"timestamp": -1};
-  const queryLimit = 1000;
-  const queryOptions = {projection: queryProjection, sort: querySort, limit: queryLimit};  // Used by standalone node.js only
-  // ACTION: UNCOMMENT   (don't edit this line - action picked up when the code is converted to AppSvcs functions)
-  //const resultArray = await coll.find(queryFilter, queryProjection).limit(queryLimit).sort(querySort).toArray();
-  // ACTION: REMOVE   (don't edit this line - action picked up when the code is converted to AppSvcs functions)
-  const resultArray = await coll.find(queryFilter, queryOptions).toArray(); 
-  // Would really do something better than just print out
-  console.log(`Collection contains ${resultArray.length} records`);
-  return resultArray.length;
+  const queryFilter = {"exchange_symbol": symbol, "ts": date};
+  const queryProjection = {"_id": 0, "exchange_symbol": 1, "ts": 1, "price": 1};
+  const queryOptions = {projection: queryProjection};  // Used by standalone node.js only
+  // ACTION: UNCOMMENT   (atlas-app-svcs only)
+  //return await coll.findOne(queryFilter, queryProjection);
+  // ACTION: REMOVE   (node.js only)
+  return await coll.findOne(queryFilter, queryOptions); 
 }
 
 
 //
-// Persist some shit
+// Get the open, close, high, low & average traded proces for a specific exchange symbox for a 
+// specific day
 //
-async function PRIV_persistSomething(message) {
-  console.log(`Peristing msg: ${message}`);
-  const collName = PRIV_getConstants().XXDATA_COLLNAME;  
-  const coll = PRIV_getDBCollection(collName);
-  await coll.insertOne({"timestamp": new Date(), "message": message});   
-  console.log(`Peristed msg: ${message}`);
+// db.orders.explain("executionStats").aggregate(pipeline);
+//
+async function PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(symbol, date) {
+  const collName = PRIV_getConstant("TRADES_TS_COLLNAME");  
+  const coll = PRIV_getDBCollection(collName); 
+  const startDatetime = new Date(date); 
+  startDatetime.setHours(0, 0, 0, 0);
+  const endDatetime = new Date(date); 
+  endDatetime.setHours(23, 59, 59, 999);  
+
+  const pipeline = [  
+    {"$match": {
+      "exchange_symbol": symbol,
+      "ts": {
+        "$gt": startDatetime,
+        "$lte": endDatetime,
+      },
+    }},
+  
+    {"$group": {
+      "_id": "",
+      "open": {"$first": "$price"},
+      "close": {"$last": "$price"},
+      "high": {"$max": "$price"},
+      "low": {"$min": "$price"},
+      "avg": {"$avg": "$price"},
+    }},
+
+    {"$unset": [
+      "_id",
+    ]},     
+  ];    
+
+  return coll.aggregate(pipeline).toArray();
 }
 
 
 //
 // Get project constants (need to wrap these in a function as need a way to share these between Atlas App Services functions
 // 
-function PRIV_getConstants() {
-  return {
-    XXDATA_COLLNAME: "xxdata",
-    YYDATA_COLLNAME: "yydata",
-    ZZDATA_COLLNAME: "zzdata",
-  }
+function PRIV_getConstant(key) {
+  const CONSTANTS = {
+    TRADES_TS_COLLNAME: "trades_ts",
+  };
+
+  return CONSTANTS[key];
 }
