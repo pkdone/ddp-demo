@@ -1,11 +1,11 @@
-# Data Delivery Platrform (DDP) Demo
+# Data Delivery Platform (DDP) Demo
 
 This project provides a demo to TODO. 
 
 
 ## Prerequisites
 
- 1. Ensure you have a running Atlas MongoDB cluster which is has a tier of M2 or greater or is a Serverless instance. Ensure the cluster has a database user which has __read + write privileges the `ddp-db` database__ and ensure the Atlas Project's network access includes an access list entry to allow access from your workstation's IP address.
+ 1. Ensure you have a running Atlas MongoDB cluster which is has a tier of M2 or greater or is a Serverless instance. Ensure the cluster has a database user which has __read + write privileges for the `ddp-db` database__ and ensure the Atlas Project's network access includes an access list entry to allow access from your workstation's IP address.
 
  2. TODO: load data into the database
 
@@ -44,13 +44,13 @@ cp 'EXAMPLE.env' '.env'
 ```
 
 
- 2. Access the demo's user interface via a web browser, using the URL printed towards the end of the output from the script run in the previous step (`build-deploy.sh`), and then register as a new user.
+ 2. TODO - front-end UI doesn't exist yet so don't try this step. Access the demo's user interface via a web browser, using the URL printed towards the end of the output from the script run in the previous step (`build-deploy.sh`), and then register as a new user.
 
 
 
 ## Coding And Running The App Back-End Locally On Your Workstation
 
-Using Node.js installed on your workstation and your IDE of choice (e.g. _VS Code_), you can locally develop, refactor, run and debug the JavaScript functions in the main back-end source `back-end/ddp-demo.js` file . The top of the source file contains sample code to run any of the API functions that will subsequently be exposed at HTTPS Endpoints when deployed as an Atlas App Services project. Just uncomment the line which invokes the particular function you want to test and debug before running from your IDE or command-line. Example Node.js command-line:
+Using Node.js installed on your workstation and your IDE of choice (e.g. _VS Code_), you can locally develop, refactor, run and debug the JavaScript functions in the main back-end source `back-end/ddp-demo.js` file. The top of the source file contains sample code to run any of the API functions that will subsequently be exposed at HTTPS Endpoints when deployed as an Atlas App Services project. Just uncomment the line which invokes the particular function you want to test and debug before running from your IDE or command-line. Example Node.js command-line:
 
 ```console
 ./node ddp-demo.js
