@@ -1,4 +1,5 @@
-module.exports = { context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRIV_getDBCollection, PRIV_logErrorAndReturnGenericError, PRIV_ensureRequestResponseExist, getDummyRequestResponse };
+module.exports = {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRIV_getDBCollection,
+                  PRIV_logErrorAndReturnGenericError, PRIV_ensureRequestResponseExist, getDummyRequestResponse};
 
 
 //
@@ -56,13 +57,15 @@ function getDummyRequestResponse(dummyParameters) {
 
 
 //
-// Ensures there is a request and response already present and if not creates placeholder versions.
+// Ensures there are request and response objects already present, and if not, creates placeholder
+// versions.
 //
-// Required in Atlas App Services when running funcitons intended for HTTPS Endpoints direction 
-// from the console
+// Required in Atlas App Services when hitting "Run" in the Funcitons console for functions really
+// intended to be invoked by HTTPS Endpoints directly.
 //
-// Required in Standaloine node.js to enable the same code to work - in this case usually the 
-// 'dummayParameters' is also provided with fake GET/POST values for testing standalone
+// Required in Standaloine node.js to enable the same code to work outside of the App Services
+// server-side runtime - in this case usually the 'dummayParameters' is also provided with fake
+// GET/POST parameters for testing standalone.
 //
 function PRIV_ensureRequestResponseExist(request, response, dummyParameters = {}) {
   if (typeof request === 'string') {

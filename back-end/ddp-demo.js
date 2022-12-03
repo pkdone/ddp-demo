@@ -1,5 +1,6 @@
 require("dotenv").config();
-const {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRIV_getDBCollection, PRIV_logErrorAndReturnGenericError, PRIV_ensureRequestResponseExist, getDummyRequestResponse } = require("./app-svcs-utils");
+const {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRIV_getDBCollection, PRIV_logErrorAndReturnGenericError, 
+       PRIV_ensureRequestResponseExist, getDummyRequestResponse} = require("./app-svcs-utils");
 
 
 // TEST WRAPPER  (similar to App Services' function test console, but for standalone node.js)
@@ -9,9 +10,12 @@ const {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRI
   // TEST TO RUN  (only uncomment one test)
   //let result = await PRIV_getLastTradedPriceForExchangeSymbolAsOf("AHD3M", new Date("2022-03-22T01:01:43.828Z"));
   //let result = await PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol("AHD3M", new Date("2022-03-22T01:01:43.828Z"));
-  const {request, response} = getDummyRequestResponse({symbol: "AHD3M", date: "2022-03-22T01:01:43.828Z"});
-  let result = await GET_lastTradedPriceForExchangeSymbolAsOf(request, response);
+  //let result = await PRIV_getLastTradedPriceForMarketSymbolAsOf("AH", new Date("2022-03-31T23:59:59.999Z"));  
+  //const {request, response} = getDummyRequestResponse({symbol: "AHD3M", date: "2022-03-22T01:01:43.828Z"});
+  //let result = await GET_lastTradedPriceForExchangeSymbolAsOf(request, response);
   //let result = await GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, response);  
+  const {request, response} = getDummyRequestResponse({symbol: "AH", date: "2022-03-31T23:59:59.999Z"});  
+  let result = await GET_LastTradedPriceForMarketSymbolAsOf(request, response);
   //let result = await POST_doThisThat(request, response);
 
   logEndTimestampWithJSONResult(result);
@@ -19,10 +23,10 @@ const {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRI
 
 
 //
-// REST Get API wrapper for getting the last tradded price for a symbol as of a particular date.
+// REST Get API wrapper for getting the last traded price for an exchange symbol as of a particular date.
 //
 // Curl example to invoke when deployed in App Svcs:
-//  curl curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
+//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
 //
 async function GET_lastTradedPriceForExchangeSymbolAsOf(request, response) {
   const func = (typeof context === "undefined") ? PRIV_getLastTradedPriceForExchangeSymbolAsOf
@@ -31,13 +35,12 @@ async function GET_lastTradedPriceForExchangeSymbolAsOf(request, response) {
 }
 
 
-
 //
 // REST Get API wrapper for getting the open, close, high, low & average traded proces for a
 // specific exchange symbox for a  specific day
 //
 // Curl example to invoke when deployed in App Svcs:
-//  curl curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
+//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
 //
 async function GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, response) {
   const func = (typeof context === "undefined") ? PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol
@@ -45,6 +48,18 @@ async function GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, r
   return await PRIV_restGetAPISymbolPlusDataWrapper(request, response, func);
 }
 
+
+//
+// REST Get API wrapper for getting the last traded price for a market symbol as of a particular date.
+//
+// Curl example to invoke when deployed in App Svcs:
+//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=65c5d45db35102312f000bab628e4b61\&symbol=AH\&date=2022-03-31T23:59:59.999Z
+//
+async function GET_LastTradedPriceForMarketSymbolAsOf(request, response) {
+  const func = (typeof context === "undefined") ? PRIV_getLastTradedPriceForMarketSymbolAsOf
+                                                : "PRIV_getLastTradedPriceForMarketSymbolAsOf";
+  return await PRIV_restGetAPISymbolPlusDataWrapper(request, response, func);
+}
 
 
 //
@@ -104,14 +119,14 @@ async function POST_doThisThat(request, response) {
 
 
 //
-// Get the last tradded price for a symbol as of a particular date.
+// Get the last traded price for an exchange symbol as of a particular date.
 //
 // db.trades_ts.explain("executionStats").find({exchange_symbol: 'AHD3M', ts: {$lte: ISODate("2022-03-22T01:01:43.828Z")}})
 //
 async function PRIV_getLastTradedPriceForExchangeSymbolAsOf(symbol, date) {
-  const collName = PRIV_getConstant("TRADES_TS_COLLNAME");  
+  const collName = PRIV_getConstant().TRADES_TS_COLLNAME;  
   const coll = PRIV_getDBCollection(collName);  
-  const queryFilter = {"exchange_symbol": symbol, "ts": date};
+  const queryFilter = {"exchange_symbol": symbol, "ts": date};   // TODO: need to use $lte for data match
   const queryProjection = {"_id": 0, "exchange_symbol": 1, "ts": 1, "price": 1};
   const queryOptions = {projection: queryProjection};  // Used by standalone node.js only
   // ACTION: UNCOMMENT   (atlas-app-svcs only)
@@ -125,10 +140,10 @@ async function PRIV_getLastTradedPriceForExchangeSymbolAsOf(symbol, date) {
 // Get the open, close, high, low & average traded proces for a specific exchange symbox for a 
 // specific day
 //
-// db.orders.explain("executionStats").aggregate(pipeline);
+// db.trades_ts.explain("executionStats").aggregate(pipeline);
 //
 async function PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(symbol, date) {
-  const collName = PRIV_getConstant("TRADES_TS_COLLNAME");  
+  const collName = PRIV_getConstant().TRADES_TS_COLLNAME;  
   const coll = PRIV_getDBCollection(collName); 
   const startDatetime = new Date(date); 
   startDatetime.setHours(0, 0, 0, 0);
@@ -163,12 +178,71 @@ async function PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(symbol
 
 
 //
+// Get the last traded price for a market symbol as of a particular date.
+//
+// db.ref_data.explain("executionStats").aggregate(pipeline);
+//
+async function PRIV_getLastTradedPriceForMarketSymbolAsOf(symbol, date) {
+  const refDataCollName = PRIV_getConstant().REF_DATA_COLLNAME;  
+  const tradesTSCollName = PRIV_getConstant().TRADES_TS_COLLNAME;  
+  const coll = PRIV_getDBCollection(refDataCollName); 
+  
+  const pipeline = [  
+    {"$match": {
+      "symbol": symbol,
+    }},
+
+    // TODO: we get many - why? and which one should we use?
+    {"$limit": 1},
+
+    {"$lookup": {
+      "from": tradesTSCollName,
+      "let": {
+        "p_exchangeSymbol": "$_id",
+      },        
+      "pipeline": [
+        {"$match":
+          {"$expr":
+            {"$and": [
+              {"$eq": ["$exchange_symbol",  "$$p_exchangeSymbol"]},
+              {"$lte": ["$ts", date]},
+            ]},
+          },
+        },
+
+        {"$sort": {
+          "ts": -1,
+        }},
+
+        {"$limit": 1},
+      ],        
+      "as": "trade",
+    }},
+    
+    {"$set": {
+      "trade": {"$first": "$trade"},
+    }},
+
+    {"$set": {
+      "price": "$trade.price",
+      "_id": "$$REMOVE",
+      "description": "$$REMOVE",
+      "security_type": "$$REMOVE",
+      "pricing": "$$REMOVE",
+      "trade": "$$REMOVE",
+    }},  
+  ];    
+
+  return coll.aggregate(pipeline).toArray();
+}
+
+
+//
 // Get project constants (need to wrap these in a function as need a way to share these between Atlas App Services functions
 // 
-function PRIV_getConstant(key) {
-  const CONSTANTS = {
+function PRIV_getConstant() {
+  return {
     TRADES_TS_COLLNAME: "trades_ts",
-  };
-
-  return CONSTANTS[key];
+    REF_DATA_COLLNAME: "ref_data",
+  }
 }

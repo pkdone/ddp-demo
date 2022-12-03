@@ -19,7 +19,8 @@ printf "^ Ignore 'push failed' errors here because these will be fixed by a subs
 realm-cli secrets create --app="${APP_NAME}" --name "ATLAS_ADMIN_API_PROJECT_PUBLIC_KEY_SECRET" --value "${ATLAS_ADMIN_API_PROJECT_PUBLIC_KEY}"
 realm-cli secrets create --app="${APP_NAME}" --name "ATLAS_ADMIN_API_PROJECT_PRIVATE_KEY_SECRET" --value "${ATLAS_ADMIN_API_PROJECT_PRIVATE_KEY}"
 realm-cli secrets create --app="${APP_NAME}" --name "DB_NAME_SECRET" --value "${DB_NAME}"
-realm-cli secrets create --app="${APP_NAME}" --name "HTTPS_TMP_PWD_SECRET" --value "$(openssl rand -hex 16)"
+realm-cli secrets create --app="${APP_NAME}" --name "HTTPS_TMP_PWD_SECRET" --value "12345"   # Temporarily hardcoded for early dev
+#realm-cli secrets create --app="${APP_NAME}" --name "HTTPS_TMP_PWD_SECRET" --value "$(openssl rand -hex 16)"
 
 # Deploy full version of the app
 realm-cli push --include-node-modules -y
