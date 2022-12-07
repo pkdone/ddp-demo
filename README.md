@@ -58,6 +58,8 @@ Using Node.js installed on your workstation and your IDE of choice (e.g. _VS Cod
 
 When you execute one of the functions in the `back-end/ddp-demo.js` file, the result will be written to the file `tmp/results.json` in your workstation project. This file output is helpful when you need to view the contents of large API response.
 
+If you are using _VS Code_ it is recommend you also install and enable its _SonarLint_ extension to help you better detect and fix potential issues.
+
 
 ## Testing App Services HTTPS Endpoints
 
