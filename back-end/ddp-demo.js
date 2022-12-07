@@ -15,7 +15,7 @@ const {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRI
   //let result = await GET_lastTradedPriceForExchangeSymbolAsOf(request, response);
   //let result = await GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, response);  
   const {request, response} = getDummyRequestResponse({symbol: "AH", date: "2022-03-31T23:59:59.999Z"});  
-  let result = await GET_LastTradedPriceForMarketSymbolAsOf(request, response);
+  let result = await GET_lastTradedPriceForMarketSymbolAsOf(request, response);
   //let result = await POST_doThisThat(request, response);
 
   logEndTimestampWithJSONResult(result);
@@ -26,12 +26,12 @@ const {context_values_get, logStartTimestamp, logEndTimestampWithJSONResult, PRI
 // REST Get API wrapper for getting the last traded price for an exchange symbol as of a particular date.
 //
 // Curl example to invoke when deployed in App Svcs:
-//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
+//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=12345\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
 //
 async function GET_lastTradedPriceForExchangeSymbolAsOf(request, response) {
   const func = (typeof context === "undefined") ? PRIV_getLastTradedPriceForExchangeSymbolAsOf
                                                 : "PRIV_getLastTradedPriceForExchangeSymbolAsOf";
-  return await PRIV_restGetAPISymbolPlusDataWrapper(request, response, func);
+  return await PRIV_invokedRestGetAPISymbolPlusDataWrapper(request, response, func);
 }
 
 
@@ -40,12 +40,12 @@ async function GET_lastTradedPriceForExchangeSymbolAsOf(request, response) {
 // specific exchange symbox for a  specific day
 //
 // Curl example to invoke when deployed in App Svcs:
-//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol?secret=65c5d45db35102312f000bab628e4b61\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
+//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol?secret=12345\&symbol=AHD3M\&date=2022-03-22T01:01:43.828Z
 //
 async function GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, response) {
   const func = (typeof context === "undefined") ? PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol
-                                                  : "PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol";
-  return await PRIV_restGetAPISymbolPlusDataWrapper(request, response, func);
+                                                : "PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol";
+  return await PRIV_invokedRestGetAPISymbolPlusDataWrapper(request, response, func);
 }
 
 
@@ -53,12 +53,12 @@ async function GET_dayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(request, r
 // REST Get API wrapper for getting the last traded price for a market symbol as of a particular date.
 //
 // Curl example to invoke when deployed in App Svcs:
-//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=65c5d45db35102312f000bab628e4b61\&symbol=AH\&date=2022-03-31T23:59:59.999Z
+//  curl https://eu-west-1.aws.data.mongodb-api.com/app/ddp-demo-XXXX/endpoint/lastTradedPriceForExchangeSymbolAsOf?secret=12345\&symbol=AH\&date=2022-03-31T23:59:59.999Z
 //
-async function GET_LastTradedPriceForMarketSymbolAsOf(request, response) {
+async function GET_lastTradedPriceForMarketSymbolAsOf(request, response) {
   const func = (typeof context === "undefined") ? PRIV_getLastTradedPriceForMarketSymbolAsOf
                                                 : "PRIV_getLastTradedPriceForMarketSymbolAsOf";
-  return await PRIV_restGetAPISymbolPlusDataWrapper(request, response, func);
+  return await PRIV_invokedRestGetAPISymbolPlusDataWrapper(request, response, func);
 }
 
 
@@ -66,7 +66,7 @@ async function GET_LastTradedPriceForMarketSymbolAsOf(request, response) {
 // Check symbol and data paramrters provided via the REST API call and then invoke the target 
 // implementation function
 //
-async function PRIV_restGetAPISymbolPlusDataWrapper(request, response, apiFunction) {
+async function PRIV_invokedRestGetAPISymbolPlusDataWrapper(request, response, apiFunction) {
   ({request, response} = PRIV_ensureRequestResponseExist(request, response));
 
   try {
@@ -121,7 +121,7 @@ async function POST_doThisThat(request, response) {
 //
 // Get the last traded price for an exchange symbol as of a particular date.
 //
-// db.trades_ts.explain("executionStats").find({exchange_symbol: 'AHD3M', ts: {$lte: ISODate("2022-03-22T01:01:43.828Z")}})
+// Index required: db.trades_ts.createIndex({exchange_symbol: 1, ts: -1});
 //
 async function PRIV_getLastTradedPriceForExchangeSymbolAsOf(symbol, date) {
   const collName = PRIV_getConstant().TRADES_TS_COLLNAME;  
@@ -140,7 +140,7 @@ async function PRIV_getLastTradedPriceForExchangeSymbolAsOf(symbol, date) {
 // Get the open, close, high, low & average traded proces for a specific exchange symbox for a 
 // specific day
 //
-// db.trades_ts.explain("executionStats").aggregate(pipeline);
+// Index required: db.trades_ts.createIndex({exchange_symbol: 1, ts: -1});
 //
 async function PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(symbol, date) {
   const collName = PRIV_getConstant().TRADES_TS_COLLNAME;  
@@ -154,7 +154,7 @@ async function PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(symbol
     {"$match": {
       "exchange_symbol": symbol,
       "ts": {
-        "$gt": startDatetime,
+        "$gte": startDatetime,
         "$lte": endDatetime,
       },
     }},
@@ -180,8 +180,11 @@ async function PRIV_getDayOpenCloseHighLowAvgTradedPriceForExchangeSymbol(symbol
 //
 // Get the last traded price for a market symbol as of a particular date.
 //
-// db.ref_data.explain("executionStats").aggregate(pipeline);
-//
+// Index required: db.ref_data.createIndex({symbol: 1})
+// Lookup Index required: db.trades_ts.createIndex({exchange_symbol: 1}); 
+// ^^ Can't use compount index in $lookup sub-query with more than one lookup element,
+//    see: https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/#correlated-subqueries-using-concise-syntax
+//  
 async function PRIV_getLastTradedPriceForMarketSymbolAsOf(symbol, date) {
   const refDataCollName = PRIV_getConstant().REF_DATA_COLLNAME;  
   const tradesTSCollName = PRIV_getConstant().TRADES_TS_COLLNAME;  
@@ -201,12 +204,17 @@ async function PRIV_getLastTradedPriceForMarketSymbolAsOf(symbol, date) {
         "p_exchangeSymbol": "$_id",
       },        
       "pipeline": [
+        // Need to do $match on first element to at least partiall hit index (can't $and this and next $match to take advantage of compound index)
         {"$match":
           {"$expr":
-            {"$and": [
-              {"$eq": ["$exchange_symbol",  "$$p_exchangeSymbol"]},
-              {"$lte": ["$ts", date]},
-            ]},
+            {"$eq": ["$exchange_symbol",  "$$p_exchangeSymbol"]},
+          },
+        },
+
+        // Relegated to seperate $match which won't be merged with the one above and will allow at least the above match to partly leverage an index
+        {"$match":
+          {"$expr":
+            {"$lte": ["$ts", date]},
           },
         },
 
